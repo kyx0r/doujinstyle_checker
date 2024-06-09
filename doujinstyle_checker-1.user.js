@@ -29,22 +29,12 @@ function match_rule(rule) {
     return document.URL.match(rule);
 }
 
-function pad(pad, str, padLeft) {
-    if (typeof str === 'undefined')
-        return pad;
-    if (padLeft) {
-        return (pad + str).slice(-pad.length);
-    } else {
-        return (str + pad).substring(0, pad.length);
-    }
-}
-
 if (match_rule("doujinstyle.*p=home")) {
     var timeout = 1000;
     var wintimeout = 500;
     var wintimeoutmax = 5000;
-    var c = 2000;
-    var maxidx = 3000;
+    var c = 3000;
+    var maxidx = 4000;
     var textFileUrl = null;
     var strs = "<pre>";
     var win = null;
@@ -64,22 +54,20 @@ if (match_rule("doujinstyle.*p=home")) {
         win = window.open(str, "_blank");
         const timer = setInterval(() => {
             if (twintimeout > wintimeoutmax) {
-                //win.close();
+                win.close();
                 strs += "dead or unhandled url ";
             } else {
                 twintimeout += wintimeout;
             }
-            if (win.closed) {
-                clearInterval(timer);
-                strs += "\n";
-                if (c < maxidx) {
-                    setTimeout(window.chk, timeout);
-                } else {
-                    strs += "</pre>";
-                    document.documentElement.innerHTML = strs;
-                }
-                c++;
+            clearInterval(timer);
+            strs += "\n";
+            if (c < maxidx) {
+                setTimeout(window.chk, timeout);
+            } else {
+                strs += "</pre>";
+                document.documentElement.innerHTML = strs;
             }
+            c++;
         }, wintimeout);
     }
 
@@ -109,7 +97,7 @@ if (match_rule("doujinstyle.*p=home")) {
 
     function eatpopup() {
         window.opener.postMessage("No redirect ", "https://doujinstyle.com/?p=home");
-        //window.close();
+        window.close();
     }
 
     if (!document.documentElement.innerHTML.match(err)) {
@@ -117,9 +105,7 @@ if (match_rule("doujinstyle.*p=home")) {
         var dlbtn = document.getElementById("downloadForm");
         var title = document.getElementsByTagName("h2")[0];
         if (title) {
-            var padding = Array(55).join(' ');
-            padding = pad(padding, " " + title.innerHTML, false);
-            window.opener.postMessage(padding, "https://doujinstyle.com/?p=home");
+            window.opener.postMessage(title.innerHTML.padEnd(55, ' '), "https://doujinstyle.com/?p=home");
         }
         /*
         var iframe = document.createElement('iframe');
