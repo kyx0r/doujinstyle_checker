@@ -98,7 +98,10 @@ if (match_rule("doujinstyle.*p=home")) {
                     strs += "</pre>";
                     document.documentElement.innerHTML = strs;
                     var html = strs.split("\n");
-                    var fhtml = "";
+                    var fhtml = [];
+                    for (c = 0; c <= maxidx; c++) {
+                        fhtml[c] = [];
+                    }
                     var iframe = new Array(maxidx+1);
                     var loadc = 0;
                     for (c = 0; c <= maxidx; c++) {
@@ -109,13 +112,20 @@ if (match_rule("doujinstyle.*p=home")) {
                             var spl = html[evt.currentTarget.c].split("</a>");
                             var realurl = "<a href=" + evt.currentTarget.subarr[1] + " target=\"_blank\">" + spl[1] + "</a> ";
                             var title = evt.currentTarget.contentWindow.document.getElementsByTagName("h2")[0];
-                            if (title)
-                                fhtml += spl[0] + "</a>|" + realurl + '|' + title.innerHTML + '|';
-                            fhtml += '\n';
+                            title = title ? title : "";
+                            fhtml[evt.currentTarget.c] = spl[0] + "</a>  " + realurl + "  " + title.innerHTML + "  ";
+                            var metadata = evt.currentTarget.contentWindow.document.getElementsByClassName("pageWrap");
+                            metadata = metadata ? metadata : "";
+                            fhtml[evt.currentTarget.c] += '\n';
+                            fhtml[evt.currentTarget.c] += metadata[0].innerHTML.replace(/<br>/g, '');
+                            fhtml[evt.currentTarget.c] += '\n';
                             evt.currentTarget.remove();
-                            loadc++;
-                            if (loadc == maxidx)
-                                document.documentElement.innerHTML = fhtml;
+                            if (loadc++ == maxidx) {
+                                var joined = "";
+                                for (var i = 0; i <= maxidx; i++)
+                                     joined += fhtml[i];
+                                document.documentElement.innerHTML = joined;
+                            }
                         });
                         iframe[c].src = str;
                         iframe[c].frameBorder = "0";
