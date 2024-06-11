@@ -53,11 +53,10 @@ if (match_rule("doujinstyle.*p=home")) {
         strs += "<a href=" + str + " target=\"_blank\">" + String(c) + "</a> ";
         win = window.open(str, "_blank");
         const timer = setInterval(() => {
+            twintimeout += wintimeout;
             if (twintimeout > wintimeoutmax) {
                 win.close();
                 strs += "dead or unhandled url ";
-            } else {
-                twintimeout += wintimeout;
             }
             if (win.closed || twintimeout > wintimeoutmax) {
                 clearInterval(timer);
@@ -131,11 +130,10 @@ if (match_rule("doujinstyle.*p=home")) {
         strs += "<a href=" + str + " target=\"_blank\">" + String(parseInt(subarr[0])) + "</a> ";
         win = window.open(subarr[1], "_blank");
         const timer = setInterval(() => {
+            twintimeout += wintimeout;
             if (twintimeout > wintimeoutmax) {
                 win.close();
                 strs += "dead or unhandled url ";
-            } else {
-                twintimeout += wintimeout;
             }
             if (win.closed || twintimeout > wintimeoutmax) {
                 clearInterval(timer);
