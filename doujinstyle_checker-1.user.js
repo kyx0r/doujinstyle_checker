@@ -43,6 +43,7 @@ if (match_rule("doujinstyle.*p=home")) {
     var strs = "<pre>";
     var win = null;
     var started = 0;
+    var fhtml = [];
 
     window.addEventListener("message", function(event){
         if (win == event.source) {
@@ -76,10 +77,29 @@ if (match_rule("doujinstyle.*p=home")) {
         }, wintimeout);
     }
 
+    window.finalize = function()
+    {
+        var joined = "";
+        for (var i = 0; i <= maxidx; i++)
+            joined += fhtml[i];
+        document.documentElement.innerHTML = '<input type="button" value="finalize" onclick="window.finalize()">' + joined;
+    }
+
+    window.rec = function (time, iframe, c, maxidx, fhtml, str)
+    {
+        var frame = document.getElementsByTagName("iframe");
+        if (frame && frame.length > 5){
+            time += frame.length * 500;
+            setTimeout(window.rec, time, time, iframe, c, maxidx, fhtml, str);
+        } else {
+            iframe[c].src = str;
+            document.body.appendChild(iframe[c]);
+        }
+    }
+
     window.scrape = function (arr)
     {
         var html = strs.split("\n");
-        var fhtml = [];
         for (c = 0; c <= maxidx; c++) {
             fhtml[c] = [];
         }
@@ -103,31 +123,14 @@ if (match_rule("doujinstyle.*p=home")) {
                 fhtml[evt.currentTarget.c] += '\n';
                 evt.currentTarget.remove();
             });
-            iframe[c].src = str;
             iframe[c].frameBorder = "0";
             iframe[c].width = "100%";
             iframe[c].height = "100%";
             iframe[c].name = "_tmpframe";
             iframe[c].c = c;
             iframe[c].subarr = subarr;
-            (function (c, time, maxidx) {
-                setTimeout(function() {
-                    document.body.appendChild(iframe[c]);
-                    if (c == maxidx) {
-                        const timer = setInterval(() => {
-                            var frame = document.getElementsByTagName("iframe");
-                            if (!frame || frame.length < 1) {
-                                clearInterval(timer);
-                                var joined = "";
-                                for (var i = 0; i <= maxidx; i++)
-                                    joined += fhtml[i];
-                                document.documentElement.innerHTML = joined;
-                            }
-                        }, wintimeout);
-                    }
-                }, time);
-            })(c, time, maxidx);
-            time += 1000;
+            window.rec(time, iframe, c, maxidx, fhtml, str);
+            time += 500;
         }
     }
 
@@ -154,7 +157,6 @@ if (match_rule("doujinstyle.*p=home")) {
                 } else {
                     strs += "</pre>";
                     document.documentElement.innerHTML = strs;
-                    window.scrape(arr);
                 }
                 c++;
             }
@@ -195,7 +197,7 @@ if (match_rule("doujinstyle.*p=home")) {
                 c = 0;
                 if (maxidx >= 0) {
                     if (strs.length > 5) {
-                        document.documentElement.innerHTML = strs;
+                        document.documentElement.innerHTML = '<input type="button" value="finalize" onclick="window.finalize()">' + strs;
                         window.scrape(arr);
                     } else
                         window.fchk(arr);
@@ -212,7 +214,13 @@ if (match_rule("doujinstyle.*p=home")) {
             var reader = new FileReader();
             reader.readAsText(file,'UTF-8');
             reader.onload = readerEvent => {
-                strs = readerEvent.target.result;
+                var regExp = /<pre>(.*?)<\/pre>/gs;
+                var match = regExp.exec(readerEvent.target.result);
+                if (match) {
+                    strs = match[0];
+                } else {
+                    console.log("bad filetype!");
+                }
             }
         }
         td.appendChild(fi1);
