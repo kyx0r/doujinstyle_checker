@@ -84,7 +84,6 @@ if (match_rule("doujinstyle.*p=home")) {
             fhtml[c] = [];
         }
         var iframe = new Array(maxidx+1);
-        var loadc = 0;
         var time = 0;
         for (c = 0; c <= maxidx; c++) {
             iframe[c] = document.createElement("iframe");
@@ -103,12 +102,6 @@ if (match_rule("doujinstyle.*p=home")) {
                 }
                 fhtml[evt.currentTarget.c] += '\n';
                 evt.currentTarget.remove();
-                if (loadc++ == maxidx) {
-                    var joined = "";
-                    for (var i = 0; i <= maxidx; i++)
-                        joined += fhtml[i];
-                    document.documentElement.innerHTML = joined;
-                }
             });
             iframe[c].src = str;
             iframe[c].frameBorder = "0";
@@ -117,11 +110,23 @@ if (match_rule("doujinstyle.*p=home")) {
             iframe[c].name = "_tmpframe";
             iframe[c].c = c;
             iframe[c].subarr = subarr;
-            (function (c, time) {
+            (function (c, time, maxidx) {
                 setTimeout(function() {
                     document.body.appendChild(iframe[c]);
+                    if (c == maxidx) {
+                        const timer = setInterval(() => {
+                            var frame = document.getElementsByTagName("iframe");
+                            if (!frame || frame.length < 1) {
+                                clearInterval(timer);
+                                var joined = "";
+                                for (var i = 0; i <= maxidx; i++)
+                                    joined += fhtml[i];
+                                document.documentElement.innerHTML = joined;
+                            }
+                        }, wintimeout);
+                    }
                 }, time);
-            })(c, time);
+            })(c, time, maxidx);
             time += 1000;
         }
     }
@@ -174,11 +179,12 @@ if (match_rule("doujinstyle.*p=home")) {
         element.setAttribute("name", "button3");
         element.setAttribute("onclick", "window.start_chk()");
         td.appendChild(element);
-        var fileinput = document.createElement('input');
-        fileinput.type = 'file';
-        fileinput.id = 'fileinput';
-        fileinput.setAttribute("style", "position: relative; display: block;");
-        fileinput.onchange = e => {
+        var fi1 = document.createElement('input');
+        fi1.type = 'file';
+        fi1.id = 'fi1';
+        fi1.name = 'links file';
+        fi1.setAttribute("style", "position: relative; display: block;");
+        fi1.onchange = e => {
             var file = e.target.files[0];
             var reader = new FileReader();
             reader.readAsText(file,'UTF-8');
@@ -188,16 +194,29 @@ if (match_rule("doujinstyle.*p=home")) {
                 maxidx = arr.length - 2;
                 c = 0;
                 if (maxidx >= 0) {
-                    /*
-                    strs = "";
-                    document.documentElement.innerHTML = strs;
-                    window.scrape(arr);
-                    */
-                    window.fchk(arr);
+                    if (strs.length > 5) {
+                        document.documentElement.innerHTML = strs;
+                        window.scrape(arr);
+                    } else
+                        window.fchk(arr);
                 }
             }
         }
-        td.appendChild(fileinput);
+        var fi2 = document.createElement('input');
+        fi2.type = 'file';
+        fi2.id = 'fi2';
+        fi2.name = '<pre> file';
+        fi2.setAttribute("style", "position: relative; display: block;");
+        fi2.onchange = e => {
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.readAsText(file,'UTF-8');
+            reader.onload = readerEvent => {
+                strs = readerEvent.target.result;
+            }
+        }
+        td.appendChild(fi1);
+        td.appendChild(fi2);
     } else {
         console.log("failed to find menu!");
     }
