@@ -56,7 +56,7 @@ if (match_rule("doujinstyle.*p=home")) {
         var twintimeout = 0;
         var str = "https://doujinstyle.com/?p=page&type=1&id=" + String(c);
         strs += "<a href=" + str + " target=\"_blank\">" + String(c) + "</a> ";
-        win = window.open(str, "_blank");
+        win = window.open(str, "worker");
         const timer = setInterval(() => {
             twintimeout += wintimeout;
             if (twintimeout > wintimeoutmax) {
@@ -89,7 +89,7 @@ if (match_rule("doujinstyle.*p=home")) {
     {
         var frame = document.getElementsByTagName("iframe");
         if (frame && frame.length > 5){
-            time += frame.length * 500;
+            time += 500;
             setTimeout(window.rec, time, time, iframe, c, maxidx, fhtml, str);
         } else {
             iframe[c].src = str;
@@ -100,6 +100,10 @@ if (match_rule("doujinstyle.*p=home")) {
     window.scrape = function (arr)
     {
         var html = strs.split("\n");
+        if (html.length - 2 != maxidx) {
+            console.log("bad lengths! " + html.length + "/" + maxidx);
+            return;
+        }
         for (c = 0; c <= maxidx; c++) {
             fhtml[c] = [];
         }
@@ -140,7 +144,7 @@ if (match_rule("doujinstyle.*p=home")) {
         var subarr = arr[c].split(' ');
         var str = "https://doujinstyle.com/?p=page&type=1&id=" + String(parseInt(subarr[0]));
         strs += "<a href=" + str + " target=\"_blank\">" + String(parseInt(subarr[0])) + "</a> ";
-        win = window.open(subarr[1], "_blank");
+        win = window.open(subarr[1], "worker");
         const timer = setInterval(() => {
             twintimeout += wintimeout;
             if (twintimeout > wintimeoutmax) {
